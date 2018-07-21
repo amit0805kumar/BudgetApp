@@ -29,13 +29,24 @@
         flex: 0 0 4.5rem;
         align-items: center;
         border-radius: 3px;
-
+ &--percentage{
+             background: rgba(206, 209, 126, 0.77);
+         color: white;
+            padding: .3rem .4rem;
+            font-size: 1rem;
+            border-radius: 3px;
+            margin-left: 1rem;
+        }
     }
     &__income {
         background: rgb(58, 102, 123);
+        &--percentage{
+            visibility: hidden;
+        }
     }
     &__expenses {
         background: rgb(139, 142, 63);
+       
     }
 }
 
@@ -159,6 +170,9 @@ select {
     &:hover &__value {
         transform: translateX(0);
     }
+    &:hover &__percentage{
+    transform: translateX(0);
+    }
 
     &__delete-btn {
         background: transparent;
@@ -169,5 +183,16 @@ select {
         &:hover {
             cursor: pointer;
         }
+    }
+    &__percentage{
+        font-size: 1rem;
+        transition: all .3s ease-in-out;
+        font-weight: 600;
+        background: #fcc3cd;
+        color: #ed2347;
+        margin-left: 1rem;
+        padding: 0.2rem 0.4rem;
+            border-radius: 3px;
+        transform: translateX(2.5rem);
     }
 }

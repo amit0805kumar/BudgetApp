@@ -44,8 +44,17 @@ html {
     flex: 0 0 4.5rem;
     align-items: center;
     border-radius: 3px; }
+    .budget__income--percentage, .budget__expenses--percentage {
+      background: rgba(206, 209, 126, 0.77);
+      color: white;
+      padding: .3rem .4rem;
+      font-size: 1rem;
+      border-radius: 3px;
+      margin-left: 1rem; }
   .budget__income {
     background: #3a667b; }
+    .budget__income--percentage {
+      visibility: hidden; }
   .budget__expenses {
     background: #8b8e3f; }
 
@@ -147,6 +156,8 @@ select {
     transform: scale(1); }
   .item:hover .item__value {
     transform: translateX(0); }
+  .item:hover .item__percentage {
+    transform: translateX(0); }
   .item__delete-btn {
     background: transparent;
     color: #d62b2b;
@@ -154,5 +165,15 @@ select {
     outline: none; }
     .item__delete-btn:hover {
       cursor: pointer; }
+  .item__percentage {
+    font-size: 1rem;
+    transition: all .3s ease-in-out;
+    font-weight: 600;
+    background: #fcc3cd;
+    color: #ed2347;
+    margin-left: 1rem;
+    padding: 0.2rem 0.4rem;
+    border-radius: 3px;
+    transform: translateX(2.5rem); }
 
 /*# sourceMappingURL=style.css.map */
