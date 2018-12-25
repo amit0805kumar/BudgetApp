@@ -47,11 +47,11 @@ $(function () {
                 data.allItems[type].push(newItem);
 
                 //Return The elements
-                /*return {
+                return {
                     type: type,
                     object: newItem
-                };*/
-                return newItem;
+                };
+//                return newItem;
             }
         }
     })();
@@ -80,9 +80,9 @@ $(function () {
                     value: DOMStrings.inputValue.val()
                 };
             },
-            getDOMStrings: DOMStrings
+            getDOMStrings: DOMStrings,
 
- /*           setUI: function (newItem) {
+            setUI: function (newItem) {
                 var itemDom, obj, type;
                 obj = newItem.object;
                 type = newItem.type;
@@ -95,7 +95,7 @@ $(function () {
                     itemDom = $('<div class="item" id="expense-0"><div class="item__description">' + obj.description + '</div><div class="right"> <div class="item__value">-' + obj.value + '</div><div class="item__percentage">10%</div> <div class="item__delete"><button class="item__delete-btn"><i class="far fa-times-circle fa-lg"></i></button> </div> </div> </div>');
                     DOMStrings.expenseTable.append(itemDom);
                 }
-            }*/
+            }
 
         }
 
@@ -125,7 +125,8 @@ $(function () {
 
             var input = UICtrl.getInputs();
             var newObject = budgetCtrl.addItem(input.type, input.desc, input.value);
-            //UICtrl.setUI(newObject);
+            UICtrl.setUI(newObject);
+            console.log(input);
         };
 
 
