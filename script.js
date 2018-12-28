@@ -1,5 +1,18 @@
 $(function () {
 
+    var data = {
+        allItems: {
+            exp: [],
+            inc: []
+        },
+        totals: {
+            exp: 0,
+            inc: 0
+        },
+        budget: 0,
+        percentage: -1
+    }
+
     //Budget Controller
     var budgetController = (function () {
 
@@ -15,15 +28,14 @@ $(function () {
         };
 
 
-        var data = {
-            allItems: {
-                exp: [],
-                inc: []
-            },
-            totals: {
-                exp: 0,
-                inc: 0
-            }
+        calculateTotal = function (type) {
+            var sum = 0;
+
+            data.allItems[type].forEach(function (current) {
+                sum += current.value;
+            });
+            data.totals[type] = sum;
+
         }
 
         return {
@@ -47,11 +59,52 @@ $(function () {
                 data.allItems[type].push(newItem);
 
                 //Return The elements
+                /*      return {
+                          type: type,
+                          object: newItem
+                      };
+                */
+                return newItem;
+            },
+            calculateBudget: function (type) {
+
+                //calculate total income and expenses
+                if (type) {
+                    calculateTotal('inc');
+                    calculateTotal('exp');
+                }
+                //calculate the budget inc-exp
+                data.budget = data.totals.inc - data.totals.exp;
+
+                //calculate the %ge of inc that we have spent
+                if (data.totals.inc > 0) {
+                    data.percentage = Math.round((data.totals.exp / data.totals.inc) * 100);
+                }
+
+            },
+
+
+            getBudget: function () {
                 return {
-                    type: type,
-                    object: newItem
-                };
-//                return newItem;
+                    budget: data.budget,
+                    totalInc: data.totals.inc,
+                    totalExp: data.totals.exp,
+                    percentage: data.percentage
+                }
+            },
+            deleteItem: function (type, val) {
+
+
+                console.log(data.totals);
+
+                console.log(val + " ");
+
+                if (type === 'inc') {
+                    data.totals["inc"] = data.totals["inc"] - val;
+                } else {
+                    data.totals["exp"] = data.totals["exp"] - val;
+                }
+                console.log(data.totals);
             }
         }
     })();
@@ -66,7 +119,12 @@ $(function () {
             inputValue: $(".add__value"),
             addBtn: $(".add__button"),
             incomeTable: $(".income__list"),
-            expenseTable: $(".expense__list")
+            expenseTable: $(".expense__list"),
+            income: $('.budget__income--value'),
+            expense: $('.budget__expenses--value'),
+            budget: $('.budget__value'),
+            percentage: $('.budget__expenses--percentage'),
+            container: $('.container')
         }
 
 
@@ -77,7 +135,7 @@ $(function () {
                 return {
                     desc: DOMStrings.inputDesc.val(),
                     type: DOMStrings.inputType.val(),
-                    value: DOMStrings.inputValue.val()
+                    value: parseFloat(DOMStrings.inputValue.val())
                 };
             },
             getDOMStrings: DOMStrings,
@@ -87,15 +145,41 @@ $(function () {
                 obj = newItem.object;
                 type = newItem.type;
 
-                if (type === 'inc') {
-                    itemDom = $('   <div class="item" id="income-1">  <div class="item__description">' + obj.description + '</div> <div class="right"> <div class="item__value">+' + obj.value + '</div> <div class="item__delete"> <button class="item__delete-btn"><i class="far fa-times-circle fa-lg"></i></button></div></div></div>');
-                    DOMStrings.incomeTable.append(itemDom);
-                } else if (type === 'exp') {
 
-                    itemDom = $('<div class="item" id="expense-0"><div class="item__description">' + obj.description + '</div><div class="right"> <div class="item__value">-' + obj.value + '</div><div class="item__percentage">10%</div> <div class="item__delete"><button class="item__delete-btn"><i class="far fa-times-circle fa-lg"></i></button> </div> </div> </div>');
-                    DOMStrings.expenseTable.append(itemDom);
+            },
+
+            addListItem: function (obj, type) {
+                var itemDom, element;
+                if (type === 'inc') {
+                    element = DOMStrings.incomeTable;
+                    itemDom = '   <div class="item" id="inc-%id%">  <div class="item__description">%description%</div> <div class="right"> <div class="item__value">%value%</div> <div class="item__delete"> <button class="item__delete-btn"><i class="far fa-times-circle fa-lg"></i></button></div></div></div>';
+                    //                    DOMStrings.incomeTable.append(itemDom);
+                } else if (type === 'exp') {
+                    element = DOMStrings.expenseTable;
+                    itemDom = '<div class="item" id="exp-%id%"><div class="item__description">%description%</div><div class="right"> <div class="item__value">%value%</div><div class="item__percentage">10%</div> <div class="item__delete"><button class="item__delete-btn"><i class="far fa-times-circle fa-lg"></i></button> </div> </div> </div>';
+                    //                    DOMStrings.expenseTable.append(itemDom);
                 }
-            }
+                var newHtml = itemDom.replace("%id%", obj.id);
+                newHtml = newHtml.replace("%description%", obj.description);
+                newHtml = newHtml.replace("%value%", obj.value);
+                element.append($(newHtml));
+            },
+            clearFieds: function () {
+                DOMStrings.inputDesc.val("");
+                DOMStrings.inputValue.val("");
+                DOMStrings.inputDesc.focus();
+            },
+            dipalyBudget: function (budget) {
+                DOMStrings.income.text("Rs. " + budget.totalInc);
+                DOMStrings.budget.text("Rs. " + budget.budget);
+                DOMStrings.expense.text("Rs. " + budget.totalExp);
+                if (budget.percentage > 0) {
+                    DOMStrings.percentage.text(budget.percentage + "% ");
+                } else {
+                    DOMStrings.percentage.text("---");
+                }
+            },
+
 
         }
 
@@ -119,21 +203,73 @@ $(function () {
 
             });
 
+            UICtrl.getDOMStrings.container.click(ctrlDeleteItems);
+        };
+
+        var updateBudget = function (type) {
+
+            //calcuate Budget
+            budgetCtrl.calculateBudget(type);
+
+            //return the budget
+            var budget = budgetCtrl.getBudget();
+
+            //Display the budget to UI
+            UICtrl.dipalyBudget(budget);
+            // console.log(budget);
         };
 
         var ctrlAddItems = function () {
-
+            //Get the input field data
             var input = UICtrl.getInputs();
-            var newObject = budgetCtrl.addItem(input.type, input.desc, input.value);
-            UICtrl.setUI(newObject);
-            console.log(input);
+            if (input.desc !== "" && input.value > 0) {
+
+                //Add it to bdget controller
+                var newObject = budgetCtrl.addItem(input.type, input.desc, input.value);
+
+                //Add it to UI
+                UICtrl.addListItem(newObject, input.type);
+
+                //Clearing the input fields
+                UICtrl.clearFieds();
+
+                //Calculate and update budget
+                updateBudget(true);
+            }
+
         };
+
+        var ctrlDeleteItems = function (event) {
+            var itemId;
+            itemId = event.target.parentNode.parentNode.parentNode.parentNode.id;
+            if (itemId) {
+                var type, id, val;
+                type = itemId.split('-')[0];
+                id = itemId.split('-')[1];
+                val = parseFloat(event.target.parentNode.parentNode.parentNode.childNodes[1].innerHTML);
+                //Delete from the data structure
+                budgetCtrl.deleteItem(type, val);
+
+                //Update the UI
+                $("#" + itemId).remove();
+
+                //Update the budget
+                updateBudget(false);
+
+            }
+        }
 
 
         return {
 
             init: function () {
                 console.log("The appliction has started");
+                UICtrl.dipalyBudget({
+                    budget: "00",
+                    totalInc: "00",
+                    totalExp: "00",
+                    percentage: "---"
+                });
 
                 setUpEventListeners();
             }
@@ -144,5 +280,6 @@ $(function () {
 
 
     controller.init();
+
 
 });
