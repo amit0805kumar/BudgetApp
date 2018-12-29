@@ -66,13 +66,13 @@ $(function () {
                 */
                 return newItem;
             },
-            calculateBudget: function (type) {
+            calculateBudget: function () {
 
                 //calculate total income and expenses
-                if (type) {
+              
                     calculateTotal('inc');
                     calculateTotal('exp');
-                }
+                
                 //calculate the budget inc-exp
                 data.budget = data.totals.inc - data.totals.exp;
 
@@ -92,19 +92,29 @@ $(function () {
                     percentage: data.percentage
                 }
             },
-            deleteItem: function (type, val) {
+            deleteItem: function (type, id,val) {
 
 
-                console.log(data.totals);
+                console.log(data.allItems);
 
-                console.log(val + " ");
+                
+                //Horrible mistakeXXXXX
 
-                if (type === 'inc') {
+              /*  if (type === 'inc') {
                     data.totals["inc"] = data.totals["inc"] - val;
                 } else {
                     data.totals["exp"] = data.totals["exp"] - val;
-                }
-                console.log(data.totals);
+                }*/
+                
+                //splice(position,number of items);
+                
+                data.allItems[type].forEach(function(current,index){
+                    if(current.value == val){
+                        data.allItems[type].splice(index,1);
+                    }
+                });
+                
+                console.log(data.allItems);
             }
         }
     })();
@@ -129,6 +139,7 @@ $(function () {
 
 
 
+        
 
         return {
             getInputs: function () {
@@ -173,7 +184,7 @@ $(function () {
                 DOMStrings.income.text("Rs. " + budget.totalInc);
                 DOMStrings.budget.text("Rs. " + budget.budget);
                 DOMStrings.expense.text("Rs. " + budget.totalExp);
-                if (budget.percentage > 0) {
+                if (budget.percentage > 0 && budget.totalInc > budget.totalExp) {
                     DOMStrings.percentage.text(budget.percentage + "% ");
                 } else {
                     DOMStrings.percentage.text("---");
@@ -206,10 +217,10 @@ $(function () {
             UICtrl.getDOMStrings.container.click(ctrlDeleteItems);
         };
 
-        var updateBudget = function (type) {
+        var updateBudget = function () {
 
             //calcuate Budget
-            budgetCtrl.calculateBudget(type);
+            budgetCtrl.calculateBudget();
 
             //return the budget
             var budget = budgetCtrl.getBudget();
@@ -234,7 +245,7 @@ $(function () {
                 UICtrl.clearFieds();
 
                 //Calculate and update budget
-                updateBudget(true);
+                updateBudget();
             }
 
         };
@@ -248,13 +259,13 @@ $(function () {
                 id = itemId.split('-')[1];
                 val = parseFloat(event.target.parentNode.parentNode.parentNode.childNodes[1].innerHTML);
                 //Delete from the data structure
-                budgetCtrl.deleteItem(type, val);
+                budgetCtrl.deleteItem(type,id,val);
 
                 //Update the UI
                 $("#" + itemId).remove();
 
                 //Update the budget
-                updateBudget(false);
+                updateBudget();
 
             }
         }
