@@ -31,10 +31,10 @@ $(function () {
             }
         };
 
-        Expense.prototype.getPercentage = function(){
+        Expense.prototype.getPercentage = function () {
 
-        return this.percentage;
-        
+            return this.percentage;
+
         };
         var Income = function (id, description, value) {
             this.id = id;
@@ -102,16 +102,16 @@ $(function () {
                 /*  expense a = 10, b = 23, c = 45
                   totalIncome = 1000
                   percentagee a = 10/1000,b=23/1000....*/
-                data.allItems.exp.forEach(function(current){
+                data.allItems.exp.forEach(function (current) {
                     current.calcPercentage(data.totals.inc);
                 });
 
             },
-            getpercentages: function(){
-                var allpercentages = data.allItems.exp.map(function(cur){
+            getpercentages: function () {
+                var allpercentages = data.allItems.exp.map(function (cur) {
                     return cur.getPercentage();
                 })
-                
+
                 return allpercentages;
             },
             getBudget: function () {
@@ -139,7 +139,7 @@ $(function () {
                         data.allItems[type].splice(index, 1);
                     }
                 });
-               
+
             }
         }
     })();
@@ -161,10 +161,23 @@ $(function () {
             percentage: $('.budget__expenses--percentage'),
             container: $('.container'),
             expensesPercentages: $('.item__percentage'),
+            month: $('.budget__title-month')
         }
 
 
-
+        function formatNumbers(num, type) {
+            var numSplit, integer, dec;
+            //2310.645 = + 2,310.64
+            num = Math.abs(num);
+            num = num.toFixed(2);
+            numSplit = num.split(".");
+            integer = numSplit[0];
+            dec = numSplit[1];
+            if (integer.length > 3) {
+                integer = integer.substr(0, integer.length - 3) + ',' + integer.substr(integer.length - 3, 3);
+            }
+            return (type === 'inc' ? '+' : "-") + " " + integer + '.' + dec;
+        }
 
 
         return {
@@ -198,7 +211,7 @@ $(function () {
                 }
                 var newHtml = itemDom.replace("%id%", obj.id);
                 newHtml = newHtml.replace("%description%", obj.description);
-                newHtml = newHtml.replace("%value%", obj.value);
+                newHtml = newHtml.replace("%value%", formatNumbers(obj.value,type));
                 element.append($(newHtml));
             },
             clearFieds: function () {
@@ -207,21 +220,32 @@ $(function () {
                 DOMStrings.inputDesc.focus();
             },
             dipalyBudget: function (budget) {
-                DOMStrings.income.text("Rs. " + budget.totalInc);
-                DOMStrings.budget.text("Rs. " + budget.budget);
-                DOMStrings.expense.text("Rs. " + budget.totalExp);
+                
+                var type;
+                budget.budget > 0 ? type = "inc" : type = 'exp';
+                DOMStrings.income.text("Rs. " + formatNumbers(budget.totalInc,"inc"));
+                DOMStrings.budget.text("Rs. " + formatNumbers(budget.budget,type));
+                DOMStrings.expense.text("Rs. " +formatNumbers(budget.totalExp,"exp"));
+                
                 if (budget.percentage > 0 && budget.totalInc > budget.totalExp) {
                     DOMStrings.percentage.text(budget.percentage + "% ");
                 } else {
                     DOMStrings.percentage.text("---");
                 }
+                 
             },
-            
-            displayPercentages: function(percentages){
-                $('.item__percentage').each(function(i,obj){
-                    obj.innerHTML = percentages[i]+'%';
+
+            displayPercentages: function (percentages) {
+                $('.item__percentage').each(function (i, obj) {
+                    obj.innerHTML = percentages[i] + '%';
                 });
             },
+            displayMonth: function(){
+                var now,year,month;
+                now = new Date();
+                year = now.getFullYear();
+                DOMStrings.month.text(year);
+            }
 
         }
 
@@ -265,10 +289,10 @@ $(function () {
             // 1.Calculate the percentage
 
             budgetCtrl.calculatePercentages();
-            
+
             // 2. Read the percenage from budget controller
             var percentages = budgetCtrl.getpercentages();
-            
+
             // 3. Update the UI with new percentage
             UICtrl.displayPercentages(percentages);
 
@@ -331,6 +355,8 @@ $(function () {
                 });
 
                 setUpEventListeners();
+                
+                UICtrl.displayMonth();
             }
 
         }
